@@ -1,0 +1,197 @@
+.bus-seat {
+  height: 1.5rem;
+  width: 2rem;
+  border-radius: 0.35rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+
+  .headrest {
+    position: absolute;
+    right: -0.25rem;
+    width: 0.5rem;
+    height: 0.75rem;
+    border-radius: 0.15rem;
+  }
+
+  /* ---------- VERTICAL VIEW ---------- */
+  &.vertical {
+    width: 1.5rem;
+    height: 2rem;
+
+    .headrest {
+      bottom: -0.25rem;
+      right: auto;
+      top: auto;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0.75rem;
+      height: 0.5rem;
+    }
+
+    .seat-no {
+      margin-right: 0;
+      margin-bottom: 0.25rem;
+    }
+
+    .steering-icon {
+      margin: 0;
+    }
+  }
+
+  .seat-no {
+    margin: 0;
+    line-height: 1;
+    margin-right: 0.15rem;
+    font-size: 0.75rem;
+  }
+
+  .steering-icon {
+    color: $light-grey;
+    height: 1.2rem;
+    width: 1.2rem;
+    display: block;
+    margin-right: 0.15rem;
+  }
+
+  /* ---------- DRIVER ---------- */
+  &.driver {
+    background-color: $white;
+    border: 1px solid $border;
+
+    &:hover {
+      background-color: lighten($white, 10%);
+      border-color: darken($border, 10%);
+      cursor: default;
+    }
+
+    .headrest {
+      background-color: $light-grey;
+    }
+
+    .steering-icon {
+      color: $light-grey;
+    }
+
+    .seat-no {
+      display: none;
+    }
+  }
+
+  /* ---------- UNAVAILABLE - FEMALE ---------- */
+  &.unavailable-female {
+    background-color: $pink;
+    border: transparent;
+    color: $light-pink;
+
+    &:hover {
+      background-color: lighten($pink, 10%);
+      cursor: not-allowed;
+    }
+
+    .headrest {
+      background-color: $light-pink;
+    }
+
+    .seat-no {
+      color: $light-pink;
+    }
+  }
+
+  /* ---------- UNAVAILABLE - MALE ---------- */
+  &.unavailable-male {
+    background-color: $blue;
+    border: none;
+    color: $blue;
+
+    &:hover {
+      background-color: lighten($blue, 10%);
+      cursor: not-allowed;
+    }
+
+    .headrest {
+      background-color: $light-blue-2;
+    }
+
+    .seat-no {
+      color: $light-blue-2;
+    }
+  }
+
+  /* ---------- AVAILABLE ---------- */
+  &.available {
+    background-color: $white;
+    border: 1px solid $border;
+    color: $txt-clr;
+
+    &:hover {
+      background-color: lighten($green, 50%);
+      border: 1px solid transparent;
+      color: darken($green, 20%);
+      cursor: pointer;
+    }
+
+    .headrest {
+      background-color: $green;
+    }
+
+    &.selected {
+      background-color: $green;
+      color: $white;
+
+      .headrest {
+        background-color: $light-green;
+      }
+
+      &:hover {
+        background-color: darken($green, 5%);
+        cursor: pointer;
+      }
+    }
+  }
+
+  /* ---------- DISABLED ---------- */
+  &.disabled {
+    background-color: $white;
+    border: 1px solid $border;
+    color: $lighter-grey;
+
+    &:hover {
+      background-color: lighten($white, 5%);
+      cursor: not-allowed;
+    }
+
+    .headrest {
+      background-color: lighten($light-grey, 20%);
+    }
+
+    .seat-no {
+      color: lighten($light-grey, 10%);
+    }
+  }
+
+  /* ---------- NOT SELECTABLE ---------- */
+  &.not-selectable {
+    cursor: default !important;
+
+    &:hover {
+      background-color: inherit !important;
+      border-color: $border !important;
+      color: inherit !important;
+    }
+
+    .seat-no {
+      color: inherit !important;
+    }
+
+    .steering-icon {
+      color: inherit !important;
+    }
+  }
+}

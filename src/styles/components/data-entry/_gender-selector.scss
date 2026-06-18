@@ -1,0 +1,74 @@
+.gender-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: fit-content;
+
+  background: $white;
+  box-shadow: -0.5rem 0 1rem 0 rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid $border;
+
+  padding: 0.35rem;
+  padding-left: 1rem;
+
+  p {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.27rem;
+    font-weight: 500;
+    color: $primary-clr;
+    white-space: nowrap;
+
+    span {
+      font-size: 1rem;
+      color: $txt-clr;
+      text-transform: lowercase;
+      letter-spacing: 0;
+    }
+  }
+}
+
+.gender-selector-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.seat-selector-widget {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .trip-body {
+    width: 100%;
+    align-items: flex-start !important;
+  }
+
+  background: $white;
+  box-shadow: -0.5rem 0 1rem 0 rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  border: 1px solid $border;
+
+  header {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid $border;
+
+    h6 {
+      font-size: 1rem;
+      color: $primary-clr;
+      text-transform: uppercase;
+      letter-spacing: 0.27rem;
+    }
+  }
+
+  .trip-details-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+}

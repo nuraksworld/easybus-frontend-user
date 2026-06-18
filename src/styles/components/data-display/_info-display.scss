@@ -1,0 +1,59 @@
+.info-block {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+
+  label {
+    color: $txt-secondary-clr;
+    font-weight: 400;
+    font-size: 0.95rem;
+  }
+
+  span {
+    font-weight: 600;
+    color: $primary-clr;
+  }
+}
+
+.availability-block {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 1 auto;
+
+  .MuiSvgIcon-root {
+    font-size: 1rem;
+    color: $white !important;
+  }
+
+  .availability-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.35rem;
+    color: $white;
+
+    &.available {
+      background-color: $primary-clr;
+    }
+
+    &.unavailable {
+      background-color: $light-grey-2;
+    }
+  }
+
+  .availability-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &.available {
+      color: $primary-clr;
+    }
+
+    &.unavailable {
+      color: $light-grey-2;
+    }
+  }
+}

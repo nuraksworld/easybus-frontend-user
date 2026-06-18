@@ -1,0 +1,157 @@
+/* ---------- Table ---------- */
+// Breakpoints
+$breakpoint-mobile: 576px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
+
+.ant-table-wrapper .ant-table-thead > tr > th,
+.ant-table-wrapper .ant-table-thead > tr > td {
+  color: $primary-clr;
+  letter-spacing: 0.27rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 0.85rem;
+  background: $light-blue;
+}
+
+.ant-table-wrapper .ant-table {
+  color: $primary-clr;
+  font-weight: 500;
+}
+
+/* ---------- Side Navigation ---------- */
+
+.side-navigation {
+  background: $primary-clr;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 16rem;
+
+  .side-navigation-logo {
+    padding-block: 1.25rem 0.9rem;
+    padding-inline: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.06rem;
+    font-size: 1.5rem;
+    text-align: left;
+    color: $white;
+  }
+
+  .primary-menu {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .secondary-menu {
+    padding: 1.5rem 1rem;
+
+    .ant-btn {
+      width: 100%;
+      @media (max-width: $breakpoint-tablet) {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+      }
+
+      @media (max-width: $breakpoint-mobile) {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+      }
+    }
+  }
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-inline,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline,
+.ant-menu-light.ant-menu-root.ant-menu-vertical,
+.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none;
+}
+
+.ant-menu-light,
+.ant-menu-light > .ant-menu {
+  background: $primary-clr;
+}
+
+.ant-menu-light .ant-menu-item {
+  color: $white;
+}
+
+.ant-menu-item {
+  padding-left: 1.2rem !important;
+}
+
+.ant-menu {
+  .MuiSvgIcon-root {
+    font-size: 1.3rem !important;
+    margin-left: -0.2rem;
+  }
+}
+
+.ant-menu-title-content {
+  margin-left: 0.5rem !important;
+}
+
+.ant-menu-light .ant-menu-item-selected,
+.ant-menu-light > .ant-menu .ant-menu-item-selected {
+  background: $white;
+  color: $black;
+}
+
+.ant-table-wrapper {
+  width: 100%;
+}
+
+.ant-menu-light:not(.ant-menu-horizontal)
+  .ant-menu-item:not(.ant-menu-item-selected):hover,
+.ant-menu-light
+  > .ant-menu:not(.ant-menu-horizontal)
+  .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background: rgba($white, 0.1);
+  color: $white;
+}
+
+.ant-menu-light:not(.ant-menu-horizontal)
+  .ant-menu-item:not(.ant-menu-item-selected):active,
+.ant-menu-light
+  > .ant-menu:not(.ant-menu-horizontal)
+  .ant-menu-item:not(.ant-menu-item-selected):active {
+  background: rgba($white, 0.25);
+  color: $white;
+}
+
+.ant-menu-light .ant-menu-item:not(.ant-menu-item-disabled):focus-visible,
+.ant-menu-light
+  > .ant-menu
+  .ant-menu-item:not(.ant-menu-item-disabled):focus-visible,
+.ant-menu-light
+  .ant-menu-submenu-title:not(.ant-menu-item-disabled):focus-visible,
+.ant-menu-light
+  > .ant-menu
+  .ant-menu-submenu-title:not(.ant-menu-item-disabled):focus-visible {
+  outline: $white;
+}
+
+/* ---------- Input ---------- */
+
+.ant-input-outlined {
+  border-color: $border;
+}
+
+/* ---------- Buttons ---------- */
+
+// .ant-btn-color-primary {
+//   background: $primary-clr;
+//   box-shadow: none;
+// }
+
+// .ant-btn-variant-solid:not(:disabled):not(.ant-btn-disabled):hover {
+//   background: rgba($primary-clr, 0.8);
+// }
+
+// .ant-btn-color-primary.ant-btn-variant-outlined,
+// .ant-btn-color-primary.ant-btn-variant-dashed {
+//   border-color: $primary-clr;
+//   color: $primary-clr;
+// }

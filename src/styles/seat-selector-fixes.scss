@@ -1,0 +1,26 @@
+/* src/styles/seat-selector-fixes.scss  (import this once in App.scss) */
+
+.seat-selector-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .trip-details-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* the part that visually centers the seat layout */
+  .bus-layout-container {
+    display: flex;
+    justify-content: center;    /* <— center horizontally */
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+/* let the seat grid be naturally centered */
+.bus-layout {
+  margin: 0 auto;              /* <— center as well */
+}

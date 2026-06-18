@@ -1,0 +1,19 @@
+.dropdown-btn {
+  font-weight: 500;
+  padding-right: 0.75rem !important;
+
+  &.ant-btn-text {
+    padding: 0 !important;
+
+    &:hover {
+      background-color: transparent !important;
+      opacity: 0.75;
+    }
+  }
+
+  .MuiSvgIcon-root {
+    margin-left: -0.35rem;
+    margin-bottom: -0.1rem;
+    font-size: 1rem;
+  }
+}

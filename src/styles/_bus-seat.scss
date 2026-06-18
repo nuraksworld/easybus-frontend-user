@@ -1,0 +1,10 @@
+/* src/styles/_bus-seat.scss (or where your seat styles live) */
+
+.bus-seat {
+  &.available { border-color: #2ecc71; color: #2ecc71; }
+  &.selected  { background: #2ecc71; color: #fff; }
+  &.takenF    { background: #e74c3c; color: #fff; }   /* red for Female */
+  &.takenM    { background: #1f3a93; color: #fff; }   /* dark blue for Male */
+  &.disabled  { background: #cfd8dc; color: #607d8b; }
+  &.driver    { background: #eceff1; color: #455a64; }
+}

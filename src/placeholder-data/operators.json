@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Skyline Travels",
+    "mobile": "+94771234567",
+    "email": "contact@skyline.lk",
+    "number_of_buses": 12
+  },
+  {
+    "name": "Sunrise Express",
+    "mobile": "+94778901234",
+    "email": "info@sunrise.lk",
+    "number_of_buses": 8
+  },
+  {
+    "name": "Green Lanka Coaches",
+    "mobile": "+94776543210",
+    "email": "support@greenlanka.lk",
+    "number_of_buses": 15
+  },
+  {
+    "name": "Eagle Wings Transport",
+    "mobile": "+94770112233",
+    "email": "bookings@eaglewings.lk",
+    "number_of_buses": 5
+  },
+  {
+    "name": "Ocean View Travels",
+    "mobile": "+94772334455",
+    "email": "ocean@travel.lk",
+    "number_of_buses": 9
+  }
+]

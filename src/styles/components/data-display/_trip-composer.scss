@@ -1,0 +1,89 @@
+// Breakpoints
+$breakpoint-mobile: 576px;
+$breakpoint-tablet: 768px;
+$breakpoint-desktop: 1024px;
+
+.trip-composer {
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 15px;
+
+  .trip-chooser {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 1rem 1.5rem;
+    background: $white;
+    box-shadow: -0.5rem 0 1rem 0 rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    border: 1px solid $border;
+
+    .trip-locations,
+    .trip-dates {
+      display: flex;
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: $breakpoint-tablet) {
+    flex-direction: column;  // From/To and Dates stacked
+    align-items: stretch;
+  }
+}
+
+.trip-selections {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  width: 100%;
+
+  .selected-trip-widget {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    background: $white;
+    box-shadow: -0.5rem 0 1rem 0 rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    border: 1px solid $border;
+
+    header {
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid $border;
+
+      h6 {
+        font-size: 1rem;
+        color: $primary-clr;
+        text-transform: uppercase;
+        letter-spacing: 0.27rem;
+      }
+    }
+
+    .selected-trip-summary-wrapper {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      .selected-trip-summary {
+        width: 100%;
+        .city-name {
+          font-weight: 600;
+          font-size: 1.2rem;
+          letter-spacing: -0.05rem;
+        }
+
+        .date-time {
+          color: $txt-secondary-clr;
+          font-weight: 400;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+  @media (max-width: $breakpoint-tablet) {
+    flex-direction: column;  // stack Onward + Return trips
+  }
+}

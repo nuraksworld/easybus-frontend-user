@@ -1,0 +1,18 @@
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+
+  .account-widget {
+    text-align: right;
+
+    p {
+      text-transform: uppercase;
+      font-weight: 600;
+      color: $primary-clr;
+      letter-spacing: 0.2rem;
+      font-size: 0.85rem;
+    }
+  }
+}

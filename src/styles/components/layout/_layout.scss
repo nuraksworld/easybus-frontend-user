@@ -1,0 +1,134 @@
+/* ---------- APP CONTAINER ---------- */
+.app-container {
+  // height: 100%;
+  // overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- HEADER (TOP NAV) ---------- */
+.top-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 4rem;
+  padding: 0 16px;
+  background: #001529;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+
+  .top-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .top-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+}
+
+.childern-content {
+  padding: 10px;
+}
+
+/* ---------- MAIN LAYOUT ---------- */
+.main-layout {
+  display: flex;
+  margin-top: 4rem; /* below header */
+  height: calc(100vh - 4rem);
+  width: 100%;
+  position: absolute;
+  z-index: 1;
+}
+
+/* === Sidebar === */
+.app-side-bar {
+  position: fixed;
+  top: 4rem;
+  left: 0;
+  height: 100%;
+  background: #001529;
+  overflow-x: hidden;
+  white-space: nowrap;
+  transition: width 250ms ease-in-out;
+
+  /* default desktop */
+  &.collapsed {
+    width: 50px;   /* icons only */
+  }
+  &.expanded {
+    width: 200px;
+  }
+
+  /* tablet view */
+  @media (max-width: 1023px) {
+    &.collapsed {
+      width: 50px;   /* always icons visible */
+    }
+    &.expanded {
+      width: 160px;  /* smaller expand */
+    }
+  }
+
+  /* mobile view */
+  @media (max-width: 767px) {
+    // position: absolute;
+    // z-index: 1200;
+    // top: 0; left: 0;
+    // height: 100vh;
+
+    &.collapsed {
+      width: 50px;   /* icons strip still visible */
+    }
+
+    &.expanded {
+      width: 160px;   /* overlay full screen */
+    }
+  }
+}
+
+/* === Display area === */
+.display-area {
+  position: absolute;
+  // top: 0;
+  height: 100%;
+  transition: left 250ms ease-in-out, width 250ms ease-in-out;
+
+  /* desktop default */
+  &.collapsed {
+    left: 50px;
+    width: calc(100% - 50px);
+  }
+  &.expanded {
+    left: 200px;
+    width: calc(100% - 200px);
+  }
+
+  /* tablet view */
+  @media (max-width: 1023px) {
+    &.collapsed {
+      left: 50px;
+      width: calc(100% - 50px);
+    }
+    &.expanded {
+      left: 160px;
+      width: calc(100% - 160px);
+    }
+  }
+
+  /* mobile view */
+  @media (max-width: 767px) {
+    left: 50px;   /* keep icons strip visible */
+    width: calc(100% - 50px);
+
+    &.expanded {
+      left: 160px;  /* push content away when sidebar overlays */
+      width: calc(100% - 160px);    /* hidden when drawer is open */
+    }
+  }
+}

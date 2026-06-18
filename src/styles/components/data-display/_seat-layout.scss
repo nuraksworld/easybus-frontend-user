@@ -1,0 +1,98 @@
+.bus-layout {
+  gap: 0.5rem;
+  width: fit-content;
+}
+
+.bus-layout.vertical {
+  display: flex;
+  flex-direction: column;
+  margin-block: 1rem;
+}
+
+.bus-layout.horizontal {
+  display: flex;
+  flex-direction: row;
+  margin-inline: 1rem;
+}
+
+.bus-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bus-layout.horizontal .bus-row {
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Front row spacing: keep space between door and driver in both views */
+.front-row {
+  justify-content: space-between;
+}
+
+/* Door space dimensions and border swap */
+.bus-layout.vertical .door-space {
+  width: 1.5rem;
+  height: 2rem;
+  border-left: 0.25rem solid $lighter-grey;
+  border-top: none;
+}
+
+.bus-layout.horizontal .door-space {
+  width: 2rem;
+  height: 1.5rem;
+  border-top: 0.25rem solid $lighter-grey;
+  border-left: none;
+}
+
+/* Empty space dimensions swap */
+.bus-layout.vertical .empty-space {
+  width: 1.5rem;
+  height: 2rem;
+  border: 1px solid $lighter-grey;
+  border-radius: 0.25rem;
+  background: $lighter-grey;
+}
+
+.bus-layout.horizontal .empty-space {
+  width: 2rem;
+  height: 1.5rem;
+  border: 1px solid $lighter-grey;
+  border-radius: 0.25rem;
+  background: $lighter-grey;
+}
+
+/* Aisle space dimensions swap */
+.bus-layout.vertical .aisle-space {
+  width: 1.7rem;
+  height: auto;
+}
+
+.bus-layout.horizontal .aisle-space {
+  width: auto;
+  height: 1.7rem;
+}
+
+/* Back row alignment */
+.back-row {
+  justify-content: center;
+}
+
+/* Bus seat - no rotation */
+.bus-seat {
+  transform: none !important;
+}
+
+.bus-layout.horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.bus-layout.horizontal .bus-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+}

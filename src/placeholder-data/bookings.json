@@ -1,0 +1,47 @@
+[
+  {
+    "booking_id": "BK001",
+    "trip_type": "one-way",
+    "passenger_name": "Kavindu Perera",
+    "seats": "1M - 2F",
+    "dates": ["2025-08-10"],
+    "payment": "paid",
+    "operator": "Skyline Travels"
+  },
+  {
+    "booking_id": "BK002",
+    "trip_type": "return",
+    "passenger_name": "Nadeesha Silva",
+    "seats": "3M",
+    "dates": ["2025-08-12"],
+    "payment": "unpaid",
+    "operator": "Sunrise Express"
+  },
+  {
+    "booking_id": "BK003",
+    "trip_type": "one-way",
+    "passenger_name": "Ruwan Fernando",
+    "seats": "4F",
+    "dates": ["2025-08-09"],
+    "payment": "paid",
+    "operator": "Green Lanka Coaches"
+  },
+  {
+    "booking_id": "BK004",
+    "trip_type": "return",
+    "passenger_name": "Dilani Gunasekara",
+    "seats": "1M - 4F",
+    "dates": ["2025-08-11"],
+    "payment": "paid",
+    "operator": "Eagle Wings Transport"
+  },
+  {
+    "booking_id": "BK005",
+    "trip_type": "one-way",
+    "passenger_name": "Ishara Jayasinghe",
+    "seats": "2F",
+    "dates": ["2025-08-13"],
+    "payment": "unpaid",
+    "operator": "Ocean View Travels"
+  }
+]
