@@ -1,161 +1,101 @@
 import React from "react";
-import { Button, Form, Input, Space, Typography } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Form, Input, Space } from "antd";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
-const { Text } = Typography;
-
-const AddOperatorPopover = ({
-  initialValues = {},
-  submitText = "Submit",
-  onSubmit,
-  onClose,
-}) => {
+/**
+ * Form for creating/updating an Operator + its buses.
+ *
+ * Expected props:
+ * - initialValues?: { owner_name, phone, company_name?, bus_numbers?: string[] }
+ * - submitText?: string ("Create" | "Update")
+ * - onSubmit(values): Promise<void> | void
+ * - onClose(): void
+ */
+const AddOperatorPopover = ({ initialValues, submitText = "Create", onSubmit, onClose }) => {
   const [form] = Form.useForm();
-
-  const normInitial = {
-    owner_name: initialValues.owner_name || "",
-    phone: initialValues.phone || "",
-    company_name: initialValues.company_name || "",
-    buses: Array.isArray(initialValues.buses) && initialValues.buses.length
-      ? initialValues.buses
-      : [{ bus_number: "", driver_name: "", driver_phone: "" }],
-  };
-
-  const handleFinish = async (values) => {
-    // normalize / trim
-    const buses = (values.buses || [])
-      .map((b) => ({
-        bus_number: String(b?.bus_number || "").trim(),
-        driver_name: String(b?.driver_name || "").trim(),
-        driver_phone: String(b?.driver_phone || "").trim(),
-      }))
-      .filter((b) => b.bus_number); // keep only rows with bus number
-
-    const payload = {
-      owner_name: String(values.owner_name || "").trim(),
-      phone: String(values.phone || "").trim(),
-      company_name: String(values.company_name || "").trim(),
-      buses,
-    };
-
-    await onSubmit(payload);
-  };
 
   return (
     <Form
       form={form}
       layout="vertical"
-      initialValues={normInitial}
-      onFinish={handleFinish}
+      initialValues={{
+        owner_name: initialValues?.owner_name || "",
+        phone: initialValues?.phone || "",
+        company_name: initialValues?.company_name || "",
+        bus_numbers: initialValues?.bus_numbers?.length ? initialValues.bus_numbers : [""],
+      }}
+      onFinish={async (values) => {
+        // normalize bus numbers: trim + remove blanks
+        const nums = (values.bus_numbers || [])
+          .map((n) => String(n || "").trim())
+          .filter(Boolean);
+        const payload = {
+          owner_name: values.owner_name.trim(),
+          phone: values.phone.trim(),
+          company_name: values.company_name?.trim() || values.owner_name.trim(),
+          bus_numbers: nums,
+        };
+        await onSubmit?.(payload);
+      }}
     >
       <Form.Item
         label="Owner Name"
         name="owner_name"
-        rules={[{ required: true, message: "Owner name is required" }]}
+        rules={[{ required: true, message: "Please enter owner name" }]}
       >
-        <Input placeholder="Owner name" />
+        <Input placeholder="e.g., Nuwan Perera" />
       </Form.Item>
 
       <Form.Item
         label="Phone"
         name="phone"
         rules={[
-          { required: true, message: "Phone is required" },
-          { pattern: /^[0-9+ ]{9,15}$/, message: "Enter a valid phone number" },
+          { required: true, message: "Please enter phone number" },
+          { pattern: /^[0-9+\-\s]{7,20}$/, message: "Invalid phone format" },
         ]}
       >
-        <Input placeholder="Phone" />
+        <Input placeholder="e.g., 07XXXXXXXX" />
       </Form.Item>
 
-      <Form.Item label="Company Name (optional)" name="company_name">
-        <Input placeholder="Company name (optional)" />
+      <Form.Item label="Company (optional)" name="company_name">
+        <Input placeholder="e.g., SilverLine Coaches" />
       </Form.Item>
 
-      <Text strong>Buses</Text>
-      <div style={{ marginTop: 8 }} />
-
-      <Form.List name="buses">
+      <Form.List name="bus_numbers">
         {(fields, { add, remove }) => (
           <>
-            {fields.map(({ key, name, ...restField }, idx) => (
-              <div
-                key={key}
-                style={{
-                  border: "1px solid #eee",
-                  borderRadius: 8,
-                  padding: 12,
-                  marginBottom: 10,
-                }}
-              >
-                <Space
-                  direction="vertical"
-                  style={{ width: "100%" }}
-                  size={10}
+            <label style={{ fontWeight: 600, marginBottom: 6, display: "inline-block" }}>
+              Bus Numbers (one owner can have multiple)
+            </label>
+            {fields.map(({ key, name, ...restField }) => (
+              <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                <Form.Item
+                  {...restField}
+                  name={name}
+                  rules={[{ required: true, message: "Enter bus number or remove the row" }]}
                 >
-                  <Form.Item
-                    {...restField}
-                    label={`Bus #${idx + 1} - Bus Number`}
-                    name={[name, "bus_number"]}
-                    rules={[{ required: true, message: "Bus number is required" }]}
-                  >
-                    <Input placeholder="e.g., WP-1111" />
-                  </Form.Item>
-
-                  <Form.Item
-                    {...restField}
-                    label="Driver Name"
-                    name={[name, "driver_name"]}
-                    rules={[{ required: true, message: "Driver name is required" }]}
-                  >
-                    <Input placeholder="Driver name" />
-                  </Form.Item>
-
-                  <Form.Item
-                    {...restField}
-                    label="Driver Phone"
-                    name={[name, "driver_phone"]}
-                    rules={[
-                      { required: true, message: "Driver phone is required" },
-                      { pattern: /^[0-9]{9,12}$/, message: "Enter a valid phone number" },
-                    ]}
-                  >
-                    <Input placeholder="077xxxxxxx" />
-                  </Form.Item>
-
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() => remove(name)}
-                      disabled={fields.length === 1}
-                    >
-                      Remove Bus
-                    </Button>
-                  </div>
-                </Space>
-              </div>
+                  <Input placeholder="e.g., WP-1234 / ND-8890" />
+                </Form.Item>
+                {fields.length > 1 && (
+                  <MinusCircleOutlined onClick={() => remove(name)} style={{ color: "#ff4d4f" }} />
+                )}
+              </Space>
             ))}
-
-            <Button
-              type="dashed"
-              block
-              icon={<PlusOutlined />}
-              onClick={() => add({ bus_number: "", driver_name: "", driver_phone: "" })}
-            >
-              Add Another Bus
-            </Button>
+            <Form.Item>
+              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                Add Another Bus
+              </Button>
+            </Form.Item>
           </>
         )}
       </Form.List>
 
-      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-        <Button type="primary" htmlType="submit" style={{ flex: 1 }}>
-          {submitText}
-        </Button>
-        <Button onClick={onClose} style={{ flex: 1 }}>
-          Cancel
-        </Button>
-      </div>
+      <Form.Item style={{ marginTop: 16 }}>
+        <Space>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="primary" htmlType="submit">{submitText}</Button>
+        </Space>
+      </Form.Item>
     </Form>
   );
 };

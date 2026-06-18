@@ -1,7 +1,6 @@
 // src/pages/book-tickets/page-overlays/SeatSelection.jsx
 import {
-  Button, Card, Empty, Form, Input, Modal,
-  message, Radio, Space, Spin, Typography
+  Button, Card, Empty, message, Radio, Space, Spin, Typography
 } from "antd";
 import React, { useEffect, useMemo, useState } from "react";
 import { LeftOutlined } from "@ant-design/icons";
@@ -24,10 +23,9 @@ const SeatSelection = () => {
   const [selectedSeats, setSelectedSeats] = useState([]); // ["12","13"]
   const [genderBySeat, setGenderBySeat] = useState({});   // { "12": "M"|"F" }
   const [locksLocal, setLocksLocal] = useState([]);       // local overlay locks after hold
-
-  const [form] = Form.useForm();
-  const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const loggedInUser = JSON.parse(localStorage.getItem("easybus_user") || "{}");
   const maxSelectable = Number(criteria?.seats || 1);
 
   const back = () => navigate(-1);
@@ -42,9 +40,6 @@ const SeatSelection = () => {
     (async () => {
       try {
         const { data } = await api.get(`/trips/${tripId}`);
-        // Expect backend getTrip to include:
-        // seats (total seats),
-        // lockedSeats: [{ seat_number, status, gender }]
         setTrip(data || null);
         setLocksLocal([]); // clear local overlay locks on load
       } catch (e) {
@@ -58,9 +53,9 @@ const SeatSelection = () => {
 
   // keep gender entries in sync with selected seats
   useEffect(() => {
-    setGenderBySeat(prev => {
+    setGenderBySeat((prev) => {
       const next = { ...prev };
-      Object.keys(next).forEach(s => {
+      Object.keys(next).forEach((s) => {
         if (!selectedSeats.includes(s)) delete next[s];
       });
       return next;
@@ -73,69 +68,77 @@ const SeatSelection = () => {
   );
   const depTime = trip?.departure_time || "—";
 
-  // Palette for SeatLayout
-  const palette = useMemo(() => ({
-    available: "#52c41a", // green
-    male: "#1677ff",      // blue
-    female: "#ff4d4f",    // red
-  }), []);
+  const palette = useMemo(
+    () => ({
+      available: "#52c41a", // green
+      male: "#1677ff", // blue
+      female: "#ff4d4f", // red
+    }),
+    []
+  );
 
-  // Combine backend locks + local locks (after hold)
   const lockedSeats = useMemo(() => {
     const server = Array.isArray(trip?.lockedSeats) ? trip.lockedSeats : [];
     const normalize = (arr) =>
-      arr.filter(Boolean).map(x => ({
-        seat_number: Number(x.seat_number),
-        gender: x.gender === "F" ? "F" : "M",
-        status: x.status || "RESERVED",
-      }));
+      arr
+        .filter(Boolean)
+        .map((x) => ({
+          seat_number: Number(x.seat_number),
+          gender: x.gender === "F" ? "F" : "M",
+          status: x.status || "RESERVED",
+        }));
     return [...normalize(server), ...normalize(locksLocal)];
   }, [trip?.lockedSeats, locksLocal]);
 
-  // Total seats must come from trip
-  const totalSeats = useMemo(() => Number(trip?.seats || trip?.total_seats || 0), [trip]);
+  const totalSeats = useMemo(
+    () => Number(trip?.seats || trip?.total_seats || 0),
+    [trip]
+  );
 
-  // SeatLayout -> we receive the latest selection
   const handleSeatChange = (arr) => {
     const onlyFirstN = arr.slice(0, maxSelectable).map(String);
     setSelectedSeats(onlyFirstN);
   };
 
   const handleGenderChange = (seat, g) =>
-    setGenderBySeat(prev => ({ ...prev, [seat]: g }));
+    setGenderBySeat((prev) => ({ ...prev, [seat]: g }));
 
-  // open modal for name/phone
-  const askCustomer = () => {
+  // ✅ Automatically use logged-in user details
+  const onReserveSeats = async () => {
     if (selectedSeats.length === 0) {
       message.warning("Pick at least one seat.");
       return;
     }
-    if (!selectedSeats.every(s => genderBySeat[s])) {
+    if (!selectedSeats.every((s) => genderBySeat[s])) {
       message.warning("Please choose Male/Female for each selected seat.");
       return;
     }
-    form.resetFields();
-    setOpen(true);
-  };
 
-  const onFinishHold = async () => {
+    const customer_name = loggedInUser?.name || "Guest";
+    const customer_phone = loggedInUser?.phone;
+
+    if (!customer_phone) {
+      message.error("Please log in again to continue.");
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      const { customer_name, customer_phone } = await form.validateFields();
-      setSubmitting(true);
-
       const body = {
         trip_id: tripId,
         seats: selectedSeats,
         genders: selectedSeats.map((s) => genderBySeat[s]),
         customer_name,
         customer_phone,
-        expected_amount: Number(trip?.price_per_seat || 0) * selectedSeats.length,
+        expected_amount:
+          Number(trip?.price_per_seat || 0) * selectedSeats.length,
         from_stop_id: criteria?.from_stop_id,
-        to_stop_id:   criteria?.to_stop_id,
+        to_stop_id: criteria?.to_stop_id,
       };
+
       const { data } = await api.post("/bookings/hold", body);
 
-      // Update local lock overlay so colors change immediately
       const newLocks = selectedSeats.map((s) => ({
         seat_number: Number(s),
         gender: genderBySeat[s],
@@ -144,21 +147,16 @@ const SeatSelection = () => {
       setLocksLocal((prev) => [...prev, ...newLocks]);
 
       message.success(`Seat(s) reserved. Booking #${data.booking_id}`);
-      setOpen(false);
-      setSelectedSeats([]); // reset selection
+
+      setSelectedSeats([]);
       setGenderBySeat({});
 
-      // ➜ Go to Manage Bookings after successful hold (like previous behavior)
-      navigate("/manage-bookings", {
+      // ✅ Redirect to My Bookings tab
+      navigate("/book-tickets", {
         replace: true,
-        state: {
-          from: "seat-selection",
-          booking_id: data.booking_id,
-          trip_id: tripId,
-        },
+        state: { tab: "myBookings" },
       });
     } catch (e) {
-      if (e?.errorFields) return; // validation
       console.error("POST /bookings/hold failed:", e);
       message.error(e?.response?.data?.error || "Failed to reserve seat(s).");
     } finally {
@@ -207,13 +205,14 @@ const SeatSelection = () => {
         Return Back
       </Button>
 
-      {/* Direction displayed correctly */}
       <div style={{ marginBottom: 8 }}>
         <Title level={4} style={{ margin: 0 }}>
-          {trip.origin} <span style={{ opacity: 0.6 }}>→</span> {trip.destination}
+          {trip.origin} <span style={{ opacity: 0.6 }}>→</span>{" "}
+          {trip.destination}
         </Title>
         <Text type="secondary">
-          {depDate} | {depTime} &nbsp;·&nbsp; Price per seat: Rs {Number(trip.price_per_seat)}.00
+          {depDate} | {depTime} &nbsp;·&nbsp; Price per seat: Rs{" "}
+          {Number(trip.price_per_seat)}.00
         </Text>
       </div>
 
@@ -231,14 +230,21 @@ const SeatSelection = () => {
           />
 
           {/* Legend */}
-          <div style={{ marginTop: 12, display: "flex", gap: 16, alignItems: "center" }}>
+          <div
+            style={{
+              marginTop: 12,
+              display: "flex",
+              gap: 16,
+              alignItems: "center",
+            }}
+          >
             <Legend swatch={palette.available} label="Available" />
             <Legend swatch={palette.male} label="Booked (Male)" />
             <Legend swatch={palette.female} label="Booked (Female)" />
           </div>
         </div>
 
-        {/* RIGHT: gender selection + final confirm */}
+        {/* RIGHT: gender selection + confirm */}
         <div style={{ width: 360 }}>
           <Card
             title={`Selected Seat${maxSelectable > 1 ? "s" : ""} (${selectedSeats.length}/${maxSelectable})`}
@@ -273,44 +279,19 @@ const SeatSelection = () => {
                     </Radio.Group>
                   </div>
                 ))}
-                <Button type="primary" block onClick={askCustomer}>
-                  Confirm
+                <Button
+                  type="primary"
+                  block
+                  onClick={onReserveSeats}
+                  loading={submitting}
+                >
+                  Reserve Seat(s)
                 </Button>
               </Space>
             )}
           </Card>
         </div>
       </div>
-
-      {/* Checkout modal (name + phone) */}
-      <Modal
-        title="Passenger Details"
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={onFinishHold}
-        confirmLoading={submitting}
-        okText="Finish"
-      >
-        <Form form={form} layout="vertical" requiredMark={false}>
-          <Form.Item
-            name="customer_name"
-            label="Name"
-            rules={[{ required: true, message: "Please enter the passenger name" }]}
-          >
-            <Input placeholder="John Doe" />
-          </Form.Item>
-          <Form.Item
-            name="customer_phone"
-            label="Phone Number"
-            rules={[
-              { required: true, message: "Please enter a phone number" },
-              { pattern: /^\+?\d{9,14}$/, message: "Please enter a valid phone number" },
-            ]}
-          >
-            <Input placeholder="+94XXXXXXXXX" />
-          </Form.Item>
-        </Form>
-      </Modal>
     </>
   );
 };

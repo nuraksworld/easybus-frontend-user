@@ -1,28 +1,10 @@
-// src/App.jsx
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
-
-import LoginPage from "./pages/auth/LoginPage";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import { BookTickets, ManageBookings, ManageOperators, ManageTrips } from "./pages";
 import SeatSelection from "./pages/book-tickets/page-overlays/SeatSelection";
-
-import {
-  BookTickets,
-  ManageBookings,
-  ManageOperators,
-  ManageTrips,
-} from "./pages";
-
-import AddDriver from "./pages/add-driver/AddDriver";
-
 import "./styles/App.scss";
 
-// Guard
 function RequireAuth({ children }) {
   const token = localStorage.getItem("easybus_token");
   const loc = useLocation();
@@ -30,17 +12,13 @@ function RequireAuth({ children }) {
   return children;
 }
 
-const App = () => {
+export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Landing */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-
-        {/* Login */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected routes */}
         <Route
           path="/book-tickets"
           element={
@@ -49,7 +27,6 @@ const App = () => {
             </RequireAuth>
           }
         />
-
         <Route
           path="/book-tickets/seat-selection"
           element={
@@ -58,7 +35,6 @@ const App = () => {
             </RequireAuth>
           }
         />
-
         <Route
           path="/manage-bookings"
           element={
@@ -67,7 +43,6 @@ const App = () => {
             </RequireAuth>
           }
         />
-
         <Route
           path="/manage-operators"
           element={
@@ -76,7 +51,6 @@ const App = () => {
             </RequireAuth>
           }
         />
-
         <Route
           path="/manage-trips"
           element={
@@ -85,20 +59,8 @@ const App = () => {
             </RequireAuth>
           }
         />
-
-        <Route
-          path="/add-driver"
-          element={
-            <RequireAuth>
-              <AddDriver />
-            </RequireAuth>
-          }
-        />
-
-        <Route path="*" element={<h2>Not Found</h2>} />
+        <Route path="*" element={<h2>Page Not Found</h2>} />
       </Routes>
     </Router>
   );
-};
-
-export default App;
+}

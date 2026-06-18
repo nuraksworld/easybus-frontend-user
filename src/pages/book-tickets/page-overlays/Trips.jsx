@@ -15,7 +15,6 @@ import { api } from "../../../api";
 const Trips = () => {
   const navigate = useNavigate();
 
-  // what the composer sends now: { route_id, from_stop_id, to_stop_id, date, seats }
   const [criteria, setCriteria] = useState(null);
   const [loading, setLoading] = useState(false);
   const [trips, setTrips] = useState([]);
@@ -29,7 +28,12 @@ const Trips = () => {
   }, [criteria?.date]);
 
   const fetchTrips = useCallback(async (crit) => {
-    if (!crit?.route_id || !crit?.from_stop_id || !crit?.to_stop_id || !crit?.date) {
+    if (
+      !crit?.route_id ||
+      !crit?.from_stop_id ||
+      !crit?.to_stop_id ||
+      !crit?.date
+    ) {
       message.warning("Please select Direction, Boarding, Destination and Date");
       return;
     }
@@ -39,19 +43,25 @@ const Trips = () => {
       from_stop_id: Number(crit.from_stop_id),
       to_stop_id: Number(crit.to_stop_id),
       seats: Number(crit.seats || 1),
-      date: typeof crit.date === "string" ? crit.date : dayjs(crit.date).format("YYYY-MM-DD"),
+      date:
+        typeof crit.date === "string"
+          ? crit.date
+          : dayjs(crit.date).format("YYYY-MM-DD"),
     };
-
-    // debug:
-    // console.log("[Trips] GET /trips/search", params);
 
     setLoading(true);
     setHasSearched(true);
+
     try {
       const { data } = await api.get("/trips/search", { params });
-      // debug: console.log("[Trips] API result:", data);
+
+      console.log("[Trips] API result:", data);
+
       setTrips(Array.isArray(data) ? data : []);
-      if (!data?.length) message.info("No trips found for your search.");
+
+      if (!data?.length) {
+        message.info("No trips found for your search.");
+      }
     } catch (err) {
       message.error(err?.response?.data?.error || "Failed to load trips");
     } finally {
@@ -59,14 +69,12 @@ const Trips = () => {
     }
   }, []);
 
-  // called by TripComposer
   const handleSearch = (values) => {
     setCriteria(values);
     fetchTrips(values);
   };
 
   const handleSelectTrip = (t) => {
-    // pass trip id and normalized criteria to seat selection page
     navigate("/book-tickets/seat-selection", {
       state: {
         tripId: t.trip_id,
@@ -82,7 +90,6 @@ const Trips = () => {
     <>
       <TripComposer onSearch={handleSearch} />
 
-      {/* Optional summary from first result (origin/destination come from API) */}
       {hasSearched && trips?.length > 0 && (
         <div className="trip-selections" style={{ marginTop: 12 }}>
           <SelectedTrip
@@ -107,30 +114,21 @@ const Trips = () => {
         ) : (
           trips.map((t) => (
             <TripCard
-  key={t.trip_id}
-  tripName={`${t.origin} → ${t.destination}`}
-  companyName={t.company_name}
-  busNumber={t.bus_number}
-  busName={t.bus_name}
-  availableSeats={t.available}
-  totalSeats={t.seats}
-  departurePoint={t.origin}
-  departureDate={dayjs(t.trip_date).format("D MMM, ddd")}
-  departureTime={t.departure_time || "—"}
-  destination={t.destination}
-  ticketPrice={Number(t.price_per_seat)}
-  onSelect={() =>
-    navigate("/book-tickets/seat-selection", {
-      state: {
-        tripId: t.trip_id,
-        criteria: {
-          ...criteria,
-          date: dayjs(criteria.date).format("YYYY-MM-DD"),
-        },
-      },
-    })
-  }
-/>
+              key={t.trip_id}
+              tripName={`${t.origin} → ${t.destination}`}
+              companyName={t.company_name}
+              busName={t.bus_name}
+              busNumber={t.bus_number}
+              acType={t.ac_type === "AC" ? "AC" : "Non AC"}
+              availableSeats={t.available}
+              totalSeats={t.seats}
+              departurePoint={t.origin}
+              departureDate={dayjs(t.trip_date).format("D MMM, ddd")}
+              departureTime={t.departure_time || "—"}
+              destination={t.destination}
+              ticketPrice={Number(t.price_per_seat)}
+              onSelect={() => handleSelectTrip(t)}
+            />
           ))
         )}
       </div>

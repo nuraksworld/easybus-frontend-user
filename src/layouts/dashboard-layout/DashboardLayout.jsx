@@ -1,66 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Button } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import { SideNavigation } from "../../components";
 import "../../styles/components/layout/_layout.scss";
 
+const { Header, Content } = Layout;
 
-
-const { Header, Content, Footer } = Layout;
-
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, showSidebar = true, showTopNav = true }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // ✅ Load user info from localStorage
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("easybus_user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch {
+      localStorage.removeItem("easybus_user");
+    }
+  }, []);
+
+  // ✅ Handle sign out
+  const handleSignout = () => {
+    localStorage.removeItem("easybus_token");
+    localStorage.removeItem("easybus_user");
+    window.location.href = "/login";
+  };
 
   return (
     <div className="app-container">
       {/* Top Navbar */}
-      <Header className="top-nav">
-        {/* LEFT: menu + logo */}
-        <div className="top-left">
-          <div className="side-nav-button" onClick={() => setCollapsed(!collapsed)}>
-            <MenuOutlined />
+      {showTopNav && (
+        <Header className="top-nav">
+          {/* LEFT: menu + logo */}
+          <div className="top-left">
+            {showSidebar && (
+              <div
+                className="side-nav-button"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                <MenuOutlined />
+              </div>
+            )}
+            <div className="logo">EasyBus</div>
           </div>
-          <div className="logo">MSCRM</div>
-        </div>
 
-        {/* RIGHT: username + signout */}
-<div className="top-right">
-  <span className="username">admin</span>
-  <Button
-    type="link"
-    className="signout-btn"
-    onClick={() => {
-      // clear auth info
-      localStorage.removeItem("token");
-      localStorage.removeItem("admin"); // if you store username/role
-      
-      // (optional) show feedback
-      // message.success("Signed out");
-      
-      // redirect to login
-      window.location.href = "/login";
-    }}
-  >
-    Signout
-  </Button>
-</div>
-
-      </Header>
-
+          {/* RIGHT: username + signout */}
+          <div className="top-right">
+            <span className="username">
+              {user?.name ? user.name : user?.phone ? user.phone : "User"}
+            </span>
+            <Button type="link" className="signout-btn" onClick={handleSignout}>
+              Sign out
+            </Button>
+          </div>
+        </Header>
+      )}
 
       {/* Main Layout */}
       <main className="main-layout">
         {/* Sidebar */}
-        <aside className={`app-side-bar ${collapsed ? "collapsed" : "expanded"}`}>
-          <SideNavigation collapsed={collapsed} />
-        </aside>
+        {showSidebar && (
+          <aside className={`app-side-bar ${collapsed ? "collapsed" : "expanded"}`}>
+            <SideNavigation collapsed={collapsed} />
+          </aside>
+        )}
 
         {/* Content */}
-        <div className={`display-area ${collapsed ? "collapsed" : "expanded"}`}>
+        <div
+          className={`display-area ${
+            showSidebar ? (collapsed ? "collapsed" : "expanded") : "no-sidebar"
+          }`}
+          style={{
+            width: showSidebar ? undefined : "100%",
+            marginLeft: showSidebar ? undefined : 0,
+          }}
+        >
           <Content className="childern-content">{children}</Content>
-          {/* <Footer className="text-center">
-            © {new Date().getFullYear()} MSCRM. All Rights Reserved.
-          </Footer> */}
         </div>
       </main>
     </div>

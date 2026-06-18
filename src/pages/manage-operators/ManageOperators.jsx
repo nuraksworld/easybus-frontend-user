@@ -3,7 +3,7 @@ import { DashboardLayout } from "../../layouts";
 import { DashboardHeader } from "../../components";
 import { Button, Input, Modal, message, Popconfirm, Table, Tag, Space } from "antd";
 import AddOperatorPopover from "../../features/manage-operators/add-new/AddOperatorPopover";
-import { api } from "../../api"; // axios instance with baseURL
+import { api } from "../../api"; // axios instance with VITE_API_URL base
 
 const ManageOperators = () => {
   const [searchText, setSearchText] = useState("");
@@ -11,16 +11,19 @@ const ManageOperators = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const [operators, setOperators] = useState([]);
-  const [buses, setBuses] = useState([]);
-  const [editing, setEditing] = useState(null);
+  const [operators, setOperators] = useState([]);   // operators rows
+  const [buses, setBuses] = useState([]);          // all buses (for mapping)
+  const [editing, setEditing] = useState(null);     // operator row being edited
 
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [ops, bs] = await Promise.all([api.get("/operators"), api.get("/buses")]);
+      const [ops, bs] = await Promise.all([
+        api.get("/operators"),
+        api.get("/buses"),
+      ]);
       setOperators(ops.data || []);
-      setBuses(bs.data || []);
+      setBuses(bs.data || []); // expects SELECT b.*, o.company_name ... from backend
     } catch (e) {
       message.error(e?.response?.data?.error || "Failed to load operators/buses");
     } finally {
@@ -28,9 +31,7 @@ const ManageOperators = () => {
     }
   }, []);
 
-  useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+  useEffect(() => { loadAll(); }, [loadAll]);
 
   // Map operator_id -> array of buses
   const busesByOperator = useMemo(() => {
@@ -43,9 +44,9 @@ const ManageOperators = () => {
     return map;
   }, [buses]);
 
-  // CREATE
+  // --- CREATE ---
   const createOperator = async (values) => {
-    // values: { owner_name, phone, company_name?, buses: [{bus_number, driver_name, driver_phone}] }
+    // values: { owner_name, phone, company_name?, bus_numbers: [] }
     try {
       // 1) create operator
       const { data } = await api.post("/operators", {
@@ -53,29 +54,21 @@ const ManageOperators = () => {
         owner_name: values.owner_name,
         phone: values.phone,
       });
-
       const operator_id = data.operator_id;
 
-      // 2) create buses (bus_number + driver details)
-      const busList = (values.buses || [])
-        .map((b) => ({
-          bus_number: String(b.bus_number || "").trim(),
-          driver_name: String(b.driver_name || "").trim(),
-          driver_phone: String(b.driver_phone || "").trim(),
-        }))
-        .filter((b) => b.bus_number);
-
-      if (busList.length) {
+      // 2) create buses (if any)
+      const nums = values.bus_numbers?.filter(Boolean) || [];
+      if (nums.length) {
         await Promise.all(
-          busList.map((b) =>
+          nums.map((num) =>
             api.post("/buses", {
               operator_id,
-              bus_number: b.bus_number,
+              bus_number: num,
               bus_name: null,
               ac_type: "NON_AC",
               total_seats: 45,
-              driver_name: b.driver_name || null,
-              driver_phone: b.driver_phone || null,
+              driver_name: null,
+              driver_phone: null,
             })
           )
         );
@@ -89,8 +82,9 @@ const ManageOperators = () => {
     }
   };
 
-  // UPDATE (operator + reconcile buses)
+  // --- UPDATE (operator + reconcile bus numbers) ---
   const updateOperator = async (operator_id, values) => {
+    // values: { owner_name, phone, company_name?, bus_numbers: [] }
     try {
       // 1) update operator fields
       await api.put(`/operators/${operator_id}`, {
@@ -99,85 +93,33 @@ const ManageOperators = () => {
         phone: values.phone,
       });
 
-      const existing = busesByOperator.get(operator_id) || [];
+      // 2) reconcile buses
+      const existing = (busesByOperator.get(operator_id) || []);
+      const currentNums = new Set(existing.map((b) => String(b.bus_number).trim()));
+      const newNums = new Set((values.bus_numbers || []).map((x) => String(x).trim()).filter(Boolean));
 
-      const existingByNum = new Map(
-        existing.map((b) => [String(b.bus_number).trim(), b])
-      );
+      // to add
+      const toAdd = [...newNums].filter((n) => !currentNums.has(n));
+      // to delete
+      const toDel = existing.filter((b) => !newNums.has(String(b.bus_number).trim()));
 
-      const incoming = (values.buses || [])
-        .map((b) => ({
-          bus_number: String(b.bus_number || "").trim(),
-          driver_name: String(b.driver_name || "").trim(),
-          driver_phone: String(b.driver_phone || "").trim(),
-        }))
-        .filter((b) => b.bus_number);
-
-      const incomingNums = new Set(incoming.map((b) => b.bus_number));
-
-      // to delete (existing not in incoming)
-      const toDel = existing.filter(
-        (b) => !incomingNums.has(String(b.bus_number).trim())
-      );
-
-      // to add (incoming not in existing)
-      const toAdd = incoming.filter(
-        (b) => !existingByNum.has(b.bus_number)
-      );
-
-      // to "update" (same bus_number but driver fields changed)
-      // We do DELETE + CREATE to avoid needing PUT /buses/:id
-      const toRecreate = incoming
-        .map((b) => {
-          const old = existingByNum.get(b.bus_number);
-          if (!old) return null;
-
-          const oldName = (old.driver_name || "").trim();
-          const oldPhone = (old.driver_phone || "").trim();
-
-          const changed =
-            oldName !== (b.driver_name || "").trim() ||
-            oldPhone !== (b.driver_phone || "").trim();
-
-          if (!changed) return null;
-
-          return { oldBusId: old.bus_id, ...b };
-        })
-        .filter(Boolean);
-
-      // delete removed buses
-      await Promise.all(toDel.map((b) => api.delete(`/buses/${b.bus_id}`)));
-
-      // recreate changed buses (delete old then create new)
+      // add
       await Promise.all(
-        toRecreate.map(async (b) => {
-          await api.delete(`/buses/${b.oldBusId}`);
-          return api.post("/buses", {
-            operator_id,
-            bus_number: b.bus_number,
-            bus_name: null,
-            ac_type: "NON_AC",
-            total_seats: 45,
-            driver_name: b.driver_name || null,
-            driver_phone: b.driver_phone || null,
-          });
-        })
-      );
-
-      // add new buses
-      await Promise.all(
-        toAdd.map((b) =>
+        toAdd.map((num) =>
           api.post("/buses", {
             operator_id,
-            bus_number: b.bus_number,
+            bus_number: num,
             bus_name: null,
             ac_type: "NON_AC",
             total_seats: 45,
-            driver_name: b.driver_name || null,
-            driver_phone: b.driver_phone || null,
+            driver_name: null,
+            driver_phone: null,
           })
         )
       );
+
+      // delete
+      await Promise.all(toDel.map((b) => api.delete(`/buses/${b.bus_id}`)));
 
       message.success("Operator updated");
       setIsEditOpen(false);
@@ -188,7 +130,7 @@ const ManageOperators = () => {
     }
   };
 
-  // DELETE operator
+  // --- DELETE operator (and its buses via FK if you want) ---
   const deleteOperator = async (operator_id) => {
     try {
       await api.delete(`/operators/${operator_id}`);
@@ -199,7 +141,7 @@ const ManageOperators = () => {
     }
   };
 
-  // Filter
+  // Filter client-side
   const filtered = useMemo(() => {
     if (!searchText) return operators;
     const q = searchText.toLowerCase();
@@ -217,18 +159,15 @@ const ManageOperators = () => {
     { title: "Phone", dataIndex: "phone", key: "phone" },
     { title: "Company", dataIndex: "company_name", key: "company_name" },
     {
-      title: "Buses (Bus | Driver | Phone)",
+      title: "Buses",
       key: "buses",
       render: (_, r) => {
         const list = busesByOperator.get(r.operator_id) || [];
         if (!list.length) return <Tag>None</Tag>;
-
         return (
-          <Space direction="vertical" size={6}>
+          <Space wrap size={[8, 8]}>
             {list.map((b) => (
-              <Tag key={b.bus_id}>
-                {b.bus_number} | {b.driver_name || "No Driver"} | {b.driver_phone || "No Phone"}
-              </Tag>
+              <Tag key={b.bus_id}>{b.bus_number}</Tag>
             ))}
           </Space>
         );
@@ -243,21 +182,17 @@ const ManageOperators = () => {
           <Button
             size="small"
             onClick={() => {
+              // compose initial form values for edit
               const list = busesByOperator.get(r.operator_id) || [];
               setEditing({
                 ...r,
-                buses: list.map((b) => ({
-                  bus_number: String(b.bus_number || ""),
-                  driver_name: b.driver_name || "",
-                  driver_phone: b.driver_phone || "",
-                })),
+                bus_numbers: list.map((b) => String(b.bus_number)),
               });
               setIsEditOpen(true);
             }}
           >
             Edit
           </Button>
-
           <Popconfirm
             title="Delete operator?"
             okText="Delete"
@@ -285,12 +220,8 @@ const ManageOperators = () => {
           style={{ maxWidth: 320 }}
           allowClear
         />
-        <Button type="primary" onClick={() => setIsCreateOpen(true)}>
-          Add New Operator
-        </Button>
-        <Button onClick={loadAll} loading={loading}>
-          Refresh
-        </Button>
+        <Button type="primary" onClick={() => setIsCreateOpen(true)}>Add New Operator</Button>
+        <Button onClick={loadAll} loading={loading}>Refresh</Button>
       </div>
 
       <Table
@@ -320,20 +251,14 @@ const ManageOperators = () => {
       <Modal
         title={editing ? `Edit Operator #${editing.operator_id}` : "Edit Operator"}
         open={isEditOpen}
-        onCancel={() => {
-          setIsEditOpen(false);
-          setEditing(null);
-        }}
+        onCancel={() => { setIsEditOpen(false); setEditing(null); }}
         footer={null}
         destroyOnClose
       >
         <AddOperatorPopover
           initialValues={editing || {}}
           submitText="Update"
-          onClose={() => {
-            setIsEditOpen(false);
-            setEditing(null);
-          }}
+          onClose={() => { setIsEditOpen(false); setEditing(null); }}
           onSubmit={(vals) => updateOperator(editing.operator_id, vals)}
         />
       </Modal>

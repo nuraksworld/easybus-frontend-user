@@ -11,3 +11,36 @@
 @import "./libraries";
 @import "./components";
 @import "./pages";
+/* Mobile layout improvements */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    background: #fafafa;
+  }
+
+  .ant-card {
+    width: 95% !important;
+    margin: auto !important;
+    border-radius: 10px;
+  }
+
+  .dashboard-header {
+    font-size: 1rem;
+    text-align: center;
+    padding: 12px !important;
+  }
+
+  .ant-btn {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .seat-layout {
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+
+  .display-area {
+    padding: 0 !important;
+  }
+}
